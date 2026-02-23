@@ -1,30 +1,27 @@
 <?php
 
-declare(strict_types=1);
-
-use App\Application\Settings\SettingsInterface;
 use DI\ContainerBuilder;
-use Monolog\Handler\StreamHandler;
-use Monolog\Logger;
-use Monolog\Processor\UidProcessor;
 use Psr\Container\ContainerInterface;
-use Psr\Log\LoggerInterface;
+
 
 return function (ContainerBuilder $containerBuilder) {
+
     $containerBuilder->addDefinitions([
-        LoggerInterface::class => function (ContainerInterface $c) {
-            $settings = $c->get(SettingsInterface::class);
 
-            $loggerSettings = $settings->get('logger');
-            $logger = new Logger($loggerSettings['name']);
+        PDO::class => function (ContainerInterface $c) {
 
-            $processor = new UidProcessor();
-            $logger->pushProcessor($processor);
+            return new PDO(
+                "mysql:host=localhost;dbname=verificaasorpresa;charset=utf8mb4",
+                "root",
+                "",
+                [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                ]
+            );
 
-            $handler = new StreamHandler($loggerSettings['path'], $loggerSettings['level']);
-            $logger->pushHandler($handler);
-
-            return $logger;
         },
+
     ]);
+
 };
