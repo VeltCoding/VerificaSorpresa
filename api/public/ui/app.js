@@ -86,6 +86,14 @@
     callEndpoint(ep);
   });
 
+  endpointInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      const ep = endpointInput.value.trim() || '/q1';
+      lastEndpoint = ep;
+      callEndpoint(ep);
+    }
+  });
+
   autoRefresh.addEventListener('change', () => {
     if (autoRefresh.checked){
       intervalId = setInterval(() => callEndpoint(lastEndpoint), 5000);
@@ -95,8 +103,10 @@
     }
   });
 
-  // run initial
-  callEndpoint(lastEndpoint);
+  // run initial only if ep param exists
+  if (epParam) {
+    callEndpoint(lastEndpoint);
+  }
 
   // check session on load
   async function checkSession(){
@@ -182,17 +192,36 @@
 
   // tab management
   const tabButtons = document.querySelectorAll('header .tabs button');
+  const dashboardSection = document.getElementById('dashboardSection');
   const querySection = document.getElementById('querySection');
   const supplierSection = document.getElementById('supplierSection');
   const adminSection = document.getElementById('adminSection');
+  
   tabButtons.forEach(btn => btn.addEventListener('click', () => {
     tabButtons.forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
     const tab = btn.getAttribute('data-tab');
+    dashboardSection.classList.toggle('hidden', tab!=='dashboard');
     querySection.classList.toggle('hidden', tab!=='query');
     supplierSection.classList.toggle('hidden', tab!=='supplier');
     adminSection.classList.toggle('hidden', tab!=='admin');
   }));
+
+  // dashboard card click handlers
+  const dashboardCards = document.querySelectorAll('.clickable-card');
+  dashboardCards.forEach(card => {
+    card.addEventListener('click', () => {
+      const endpoint = card.getAttribute('data-endpoint');
+      endpointInput.value = endpoint;
+      lastEndpoint = endpoint;
+      callEndpoint(endpoint);
+      // switch to query tab
+      tabButtons.forEach(b => b.classList.remove('active'));
+      tabButtons[1].classList.add('active'); // query tab is second
+      dashboardSection.classList.add('hidden');
+      querySection.classList.remove('hidden');
+    });
+  });
 
   // authentication state
   let sessionSupplier = null;
@@ -334,9 +363,9 @@
   const nextPageAdmin = document.getElementById('nextPageAdmin');
   const pageInfoAdmin = document.getElementById('pageInfoAdmin');
   const adminContent = document.getElementById('adminContent');
-  document.querySelectorAll('.admin-tab-controls button').forEach(btn => {
+  document.querySelectorAll('.admin-tabs button').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('.admin-tab-controls button').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.admin-tabs button').forEach(b=>b.classList.remove('active'));
       btn.classList.add('active');
       adminType = btn.getAttribute('data-admintab');
       adminPage = 1;
