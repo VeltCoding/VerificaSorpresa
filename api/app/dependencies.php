@@ -14,7 +14,8 @@ return function (ContainerBuilder $containerBuilder) {
 
             $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
             $pdo->setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_ASSOC);
-            // ensure tables exist and have auth columns
+            
+            // Create Fornitori table
             $pdo->exec("CREATE TABLE IF NOT EXISTS Fornitori (
                 fid TEXT PRIMARY KEY,
                 fnome TEXT NOT NULL,
@@ -28,6 +29,23 @@ return function (ContainerBuilder $containerBuilder) {
             if (!in_array('password', $names)) {
                 $pdo->exec("ALTER TABLE Fornitori ADD COLUMN password TEXT");
             }
+
+            // Create Pezzi table
+            $pdo->exec("CREATE TABLE IF NOT EXISTS Pezzi (
+                pid TEXT PRIMARY KEY,
+                pnome TEXT,
+                colore TEXT
+            )");
+
+            // Create Catalogo table
+            $pdo->exec("CREATE TABLE IF NOT EXISTS Catalogo (
+                fid TEXT NOT NULL,
+                pid TEXT NOT NULL,
+                costo REAL NOT NULL,
+                PRIMARY KEY (fid, pid),
+                FOREIGN KEY (fid) REFERENCES Fornitori(fid),
+                FOREIGN KEY (pid) REFERENCES Pezzi(pid)
+            )");
 
             return $pdo;
         },

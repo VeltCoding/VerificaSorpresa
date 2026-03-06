@@ -79,6 +79,7 @@ pre{white-space:pre-wrap;word-break:break-word;background:#282c34;color:#abb2bf;
 .supplier-controls{margin-bottom:16px}
 .supplier-controls label{display:flex;align-items:center;gap:8px;color:#e1e4e8}
 .supplier-controls select{padding:8px 12px;border:1px solid #444;border-radius:6px;background:#2a2e36;color:#fff}
+.error{color:#ff6a88;margin-top:12px;font-weight:600}
 
 /* Admin section */
 .admin-tabs{display:flex;gap:8px;margin-bottom:20px}

@@ -231,7 +231,7 @@
   let supPage = 1;
   const supPer = 5;
   const supplierSelect = document.getElementById('supplierSelect');
-  const addCatalogItemBtn = document.getElementById('addCatalogItemBtn');
+  const addCatalogItemBtn = document.getElementById('addCatalogItemBtn') || {classList:{add:()=>{},remove:()=>{}}}; // guard when missing
   const supplierCatalog = document.getElementById('supplierCatalog');
   const prevPageSup = document.getElementById('prevPageSup');
   const nextPageSup = document.getElementById('nextPageSup');
@@ -240,22 +240,33 @@
   const formDialog = document.getElementById('formDialog');
 
   async function loadSuppliers(page=1){
-    const res = await fetch(`/suppliers?page=${page}&per_page=${supPer}`,{credentials:'include'});
-    const json = await res.json();
-    supplierSelect.innerHTML = '<option value="">-- seleziona fornitore --</option>';
-    json.data.forEach(s=>{
-      const opt = document.createElement('option');
-      opt.value = s.fid;
-      opt.textContent = s.fnome;
-      supplierSelect.appendChild(opt);
-    });
-    if(sessionSupplier){
-      supplierSelect.value = sessionSupplier.fid;
-      supplierSelect.disabled = true;
-      document.getElementById('chooseSupplierControls').classList.add('hidden');
-    } else {
-      supplierSelect.disabled = false;
-      document.getElementById('chooseSupplierControls').classList.remove('hidden');
+    try {
+      const res = await fetch(`/suppliers?page=${page}&per_page=${supPer}`);
+      if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
+      const json = await res.json();
+      supplierSelect.disabled = false; // always enable
+      supplierSelect.innerHTML = '<option value="">-- seleziona fornitore --</option>';
+      json.data.forEach(s=>{
+        const opt = document.createElement('option');
+        opt.value = s.fid;
+        opt.textContent = s.fnome;
+        supplierSelect.appendChild(opt);
+      });
+      if(sessionSupplier){
+        supplierSelect.value = sessionSupplier.fid;
+      }
+      // if no current selected and we have at least one supplier, pick first
+      if(!currentSupplier && supplierSelect.options.length > 1){
+        currentSupplier = supplierSelect.options[1].value;
+        supplierSelect.value = currentSupplier;
+      }
+      // always render after populating (even if already had currentSupplier)
+      if(currentSupplier){
+        renderSupplierCatalog();
+      }
+    } catch(e){
+      console.error('loadSuppliers failed', e);
+      supplierCatalog.innerHTML = '<p class="error">Impossibile caricare i fornitori.</p>';
     }
     // pagination not implemented for supplier list in UI yet
   }
@@ -286,7 +297,7 @@
     } else {
       addCatalogItemBtn.classList.add('hidden');
     }
-    const res = await fetch(`/suppliers/${currentSupplier}/catalog?page=${supPage}&per_page=${supPer}`,{credentials:'include'});
+    const res = await fetch(`/suppliers/${currentSupplier}/catalog?page=${supPage}&per_page=${supPer}`);
     const json = await res.json();
     const table = document.createElement('table');
     table.innerHTML = `<thead><tr><th>PID</th><th>Nome</th><th>Colore</th><th>Costo</th><th>Azioni</th></tr></thead>`;

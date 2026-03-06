@@ -131,9 +131,11 @@
           </form>
           <p>Nuovo fornitore? <button id="showRegisterBtn" class="btn-link">Registrati</button></p>
         </div>
+      </div>
+      <div id="regBlock" class="auth-container hidden">
         <div class="auth-card">
           <h3>Registrazione Rapida</h3>
-          <form id="registerForm" class="dialog-form hidden" style="display:none;">
+          <form id="registerForm" class="dialog-form">
             <label>Nome fornitore: <input name="fnome" required></label>
             <label>Indirizzo: <input name="indirizzo" required></label>
             <label>Username: <input name="username" required></label>
@@ -155,6 +157,7 @@
         </label>
       </div>
       <div id="supplierCatalog"></div>
+      <button id="addCatalogItemBtn" class="btn-primary hidden">Aggiungi Prodotto</button>
       <dialog id="detailDialog" class="modal-dialog"></dialog>
       <dialog id="formDialog" class="modal-dialog"></dialog>
     </section>
